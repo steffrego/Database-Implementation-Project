@@ -1,4 +1,10 @@
 Question 1:
+The company’s human resources department needs information on the current training levels of the employees. 
+They need information that shows, for each employee, and his/her acquired skills, the number of times he or she received
+training for that skill, the most recent date of the training, and the number of months (full months only) that have passed
+since the most recent training for the skill. Include all employees in the output, even if they have not received any training yet.
+
+
 
 SQL> COLUMN "Employee" FORMAT A22
 SQL> COLUMN "Skill Acquired" FORMAT A20
@@ -16,11 +22,6 @@ SQL> SELECT Employee AS  "Employee", Skill_Acquired AS "Skill Acquired" ,No_Trai
   9                     LEFT OUTER JOIN Skill USING (code)
  10       GROUP BY emp_num , emp_first , emp_last , code , description
  11       ORDER BY emp_num);
-
-
-
-
-
 
 
 
@@ -67,13 +68,15 @@ Employee               Skill Acquired       No Trainings Latest Acquired Date No
 
 
 
-
-
-
-
+-----------------------------------------------------------------------------------------------------------------------------------------
 
  
-Question 2:
+Question 2: 
+Due to a recent re-organization, the company needs a list that shows who supervises who. List all the employees in the
+company clearly indicating the organizational hierarchy. Include the “level” of the hierarchy each employee is at and the department 
+name of the employee.
+
+
 
 SQL> COLUMN "Employee" FORMAT A30
 SQL> COLUMN Name FORMAT A27
@@ -120,7 +123,18 @@ SQL> SELECT LEVEL as "Level",
          4          126 Krystal Lee       115: Financial Advisory
 
 
-Question 3:
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Question 3: 
+For every ongoing project (i.e., a project with total cost being NULL) provide the project name, project start date.
+In addition, for each month of the project list the number of employees assigned that month and hours spent on the project that month.
+At the end provide an overall total of the number of employees assigned to the project and the total hours spent on the project.
+
+
+
 
 SQL> BREAK ON "Project Name" on  "Project Start Date"  skip 1
 SQL> COLUMN "Project Name"  FORMAT A45
@@ -148,6 +162,7 @@ SQL> SELECT Name AS "Project Name" ,
  16  GROUP BY GROUPING SETS(Name,(Name, Start_Date,to_char(Date_Assigned , 'MONTH')))
  17  ORDER BY Name, to_date(to_char(Date_Assigned , 'MONTH'), 'MONTH'));
 
+
 Project Name                                  Project Start Date  Assigned Month  No.of Employees Hours Spent
 --------------------------------------------- ------------------- --------------- --------------- ----------------------------------------
 10: PNC Banking Financial Implementation      01-NOV-19           OCTOBER                       2 155
@@ -171,7 +186,18 @@ Project Name                                  Project Start Date  Assigned Month
 11 rows selected.
  
 
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
 Question 4:
+The company has decided to adopt a bonus policy for their employees. Each employee will receive a bonus of $200 for 
+every project started last calendar year, on which they have charged at least 40 hours. As a result, management has asked you to 
+update the employee records to include their current bonus information. In order to accomplish this, you will have to add another 
+column to the EMPLOYEE table (i.e., column BONUS_AMT), before you update the data. After the single Update statement is performed,
+list the contents of the Employee table.
+
+
 
 SQL> ALTER TABLE employee
   2  ADD ( BONUS_AMT  number(6,2) DEFAULT 0);
@@ -200,6 +226,8 @@ SQL> UPDATE employee E
 
 SQL> SELECT * FROM EMPLOYEE;
  
+ 
+ 
 EMP_NUM EMP_LAST                  EMP_FIRST                 DOB       HIRE_DATE   SUPER_ID  DEPT_CODE  BONUS_AMT
 ---------- ------------------------- ------------------------- --------- --------- ---------- ---------- ----------
        100 Jones                     Amelia                    17-MAY-74 18-MAY-11                   110          0
@@ -235,7 +263,15 @@ EMP_NUM EMP_LAST                  EMP_FIRST                 DOB       HIRE_DATE 
 
 30 rows selected.
  
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
 Question 5:
+For each employee hired last calendar year, list the name and the hire date of the employee, name of training received
+(if any), date of the training, and the number of days between the hire date and the training. Also include number of projects that
+employee worked on so far.
+ 
 
 SQL> COLUMN "Employee" FORMAT A20
 SQL> COLUMN "Date of Training" FORMAT A17
@@ -263,9 +299,18 @@ Employee             Hire Date         Training Name          Date of Training  
 117: Howard Wheeler  13-MAY-18         1022: Java Workshop    15-JAN-19         247                                                   0
 127: Tommy Lee       03-NOV-18         NA                     NA                NA                                                    0
 
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+
  
-Question 6: 
+Question 6:  
+Some projects are discontinued for certain period of time and resumed later. Find out project name and start date of those projects 
+that have discontinuous activity. Indicate whether the “discontinued” projects have been completed (i.e., your output should clearly 
+indicate this by “completed” or “on-going” value in a column).
 /* To calculate discontinuity , the logic used is if no employee was assigned to the project for a certain period of time and then employees are reassigned to the project. Such projects are considered discontinuous projects*/
+
 
 Project 10:Nobody was assigned to project from 21-Oct-2019 to 31-Oct-2019
 Project 1: Nobody was assigned to project from 01-Aug-2018 to 31-Aug-2018
@@ -295,7 +340,15 @@ Project Name                                  Start Date     Status
 7: Uber Profit maximization system            13-OCT-19      on-going
 
  
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ 
 Question 7:
+We need a summary of project information for each quarter of this year. For each quarter include: number of projects started 
+in the quarter, number of employees working on those projects in the quarter, number of hours spent on average per project
+
+
 
 /*Note: While calculating projects in a Quarter, for projects split between 2 Quarters, project is counted only in the Quarter it started. However, number of employees and average hours per project are calculated for all the Quarters in which the project had employees assigned.
 
@@ -337,9 +390,15 @@ Quarter Project Count Employee Count Average Hours per Project
 
 
 
+-----------------------------------------------------------------------------------------------------------------------------------------
 
  
 Question 8:
+For each employee and each skill, list the number of times the employee had training and the latest date (most recent)
+when the employee acquired that particular skill. Also, provide the number of trainings provided/attended for each skill,
+and the number of skills acquired by each employee.
+
+
 SQL> SET LINESIZE 20000
 SQL> SET PAGESIZE 20000
 SQL> COLUMN "Employee Name" FORMAT A20
@@ -441,8 +500,15 @@ SQL> SELECT ID,
 
 31 rows selected.
 
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
  
 Question 9: 
+For each department and each skill combination, list the number of trainings completed within the department that was 
+associated with the particular skill. Also provide a rank of each skill within each department. The rank should be based on the
+number of trainings completed for that skill. Same rank should be given when the number of trainings is the same.
 
 /*Note: For departments where no employee undertook any training , the no. of trainings for all skills is 0 and hence all have the same Rank 1*/
 
@@ -512,8 +578,17 @@ Department                Skill             No of trainings       Rank
                           70: Data Mining                 0          2
 
 42 rows selected.
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
  
-Question 10:
+ 
+ 
+Question 10: For each employee, list ID and name, his/her supervisor’s ID and name (concatenate ID and name for both employees and
+supervisors), any training each employee has had, and the skill(s) associated with the training. For the employee’s training, list
+the name of training, training date, skill(s) obtained through the training, and the number of months since the training date.
+In addition, provide the number of trainings each employee has had
+
 
 /*Note: Only considered full months since training date*/
 
@@ -585,7 +660,17 @@ Employee                  Supervisor                #Training Training Name     
 206: Steve Newton         205: Mary Whitestar       1         1004: C++ Training        08-MAR-16      60: C++                   44
 
 41 rows selected. 
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
 Question 11:
+The firm defines utilization as the number of hours worked since employment divided by the number of hours available.
+It also awards the best utilized employee with $10,000, second best with $9000 and so on till the fifth best with $6000.
+Given that each employee can work only 40 hours-per-week, list the top five employees with highest utilization. Also list
+the utilization rate and the assigned award/bonus.
+
 
 /*Note: Calculated Utilization rate and rounded upto 4 decimals*/   
 
@@ -627,7 +712,21 @@ SQL> SELECT rank AS " Rank" , "Employee" , "Utilization Rate" ,
          5 105: Mary Krall                .0549                $6,000
 
  
+------------------------------------------------------------- ---------------------------------------------------------------------------
+
+ 
+ 
 Question 12: 
+Create a single query that accesses the system catalog to retrieve information about your database tables and their columns, 
+as well as any constraints on those columns. Include the following:
+a. Table name
+b. Column name
+c. Constraint name
+d. Constraint type. Instead of the Oracle’s one letter codes, use the two letter indicators as
+defined in lecture #12
+e. Search condition (for any check constraints), and
+f. Table and column that each FK references
+
 
 SQL> BREAK ON "Table Name"
 SQL>
