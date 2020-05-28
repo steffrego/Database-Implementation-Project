@@ -1,0 +1,728 @@
+Question 1:
+
+SQL> COLUMN "Employee" FORMAT A22
+SQL> COLUMN "Skill Acquired" FORMAT A20
+SQL> COLUMN "Latest Acquired Date" FORMAT A20
+SQL> COLUMN "No of Months" FORMAT A15
+SQL>
+SQL> SELECT Employee AS  "Employee", Skill_Acquired AS "Skill Acquired" ,No_Trainings AS "No Trainings" ,
+  2         Lastest_Acquired_Date AS "Latest Acquired Date", No_of_Months as "No of Months"
+  3  FROM(SELECT emp_num||': '|| emp_first ||' '|| emp_last AS Employee ,
+  4              DECODE(code,null, '-----------' , code||': ' ||Description ) AS Skill_Acquired ,
+  5              COUNT( train_num) AS No_Trainings ,
+  6              DECODE(MAX(Date_acquired) , null , '---------' ,MAX(Date_acquired))  AS Lastest_Acquired_Date ,
+  7      NVL(TO_CHAR(TRUNC(MONTHS_BETWEEN(SYSDATE , MAX(Date_acquired)),0)), '0') AS No_of_Months
+  8       FROM Employee LEFT OUTER JOIN Training USING ( EMP_NUM)
+  9                     LEFT OUTER JOIN Skill USING (code)
+ 10       GROUP BY emp_num , emp_first , emp_last , code , description
+ 11       ORDER BY emp_num);
+
+
+
+
+
+
+
+
+
+ 
+Employee               Skill Acquired       No Trainings Latest Acquired Date No of Months
+---------------------- -------------------- ------------ -------------------- ---------------
+100: Amelia Jones      -----------                     0 ---------            0
+101: Scott Harris      40: Python                      1 07-FEB-16            45
+102: Bill Getz         50: Tableau                     1 06-JUN-14            65
+103: Ana Ramos         60: C++                         1 01-AUG-15            52
+104: Stan Evans        40: Python                      2 03-APR-18            20
+105: Mary Krall        10: ETL                         1 01-JUN-18            18
+106: Pat Boon          50: Tableau                     1 01-MAY-17            31
+107: Jim Hall          10: ETL                         1 01-NOV-19            1
+108: Adam Roditi       20: Spark                       2 01-JUN-16            42
+109: Ray Nelson        20: Spark                       1 04-MAR-17            32
+109: Ray Nelson        30: Java                        2 02-DEC-16            36
+110: Chris Corman      30: Java                        2 01-APR-18            20
+111: William Belli     40: Python                      1 05-NOV-19            0
+112: Lisa Swift        50: Tableau                     1 01-NOV-19            1
+113: Kelly Milton      40: Python                      1 05-NOV-19            0
+114: Henry Carter      60: C++                         1 06-AUG-15            51
+115: Jill Bertram      30: Java                        2 04-MAR-17            32
+115: Jill Bertram      40: Python                      2 05-MAY-18            18
+116: Bob Gates         50: Tableau                     1 12-DEC-18            11
+117: Howard Wheeler    30: Java                        1 15-JAN-19            10
+118: Jennie Kim        -----------                     0 ---------            0
+119: Tony Robert       -----------                     0 ---------            0
+120: Yun Xie           -----------                     0 ---------            0
+121: Rose Park         -----------                     0 ---------            0
+122: Jisoo Kim         10: ETL                         1 01-DEC-14            60
+122: Jisoo Kim         20: Spark                       1 03-MAR-15            57
+122: Jisoo Kim         60: C++                         2 06-MAY-14            66
+123: Jesse Einsenberg  10: ETL                         1 06-JUL-13            76
+124: Andrew Garfield   30: Java                        1 03-MAR-19            9
+125: Emma Stone        30: Java                        1 05-DEC-18            11
+126: Krystal Lee       20: Spark                       1 01-JUN-19            6
+127: Tommy Lee         -----------                     0 ---------            0
+205: Mary Whitestar    10: ETL                         1 05-MAY-14            66
+206: Steve Newton      60: C++                         1 08-MAR-16            44
+
+34 rows selected.
+
+
+
+
+
+
+
+
+ 
+Question 2:
+
+SQL> COLUMN "Employee" FORMAT A30
+SQL> COLUMN Name FORMAT A27
+SQL> COLUMN "Department" FORMAT A25
+SQL>
+SQL> SELECT LEVEL as "Level",
+  2         LPAD(' ', 3*(LEVEL-1))|| Emp_Num||' '||Emp_First||' '||Emp_Last AS "Employee", Dept_Code||': '||Name AS "Department"
+  3  FROM Employee LEFT OUTER JOIN Department USING(Dept_Code)
+  4  START WITH Emp_Num = 100
+  5  CONNECT BY PRIOR Emp_Num = Super_ID;
+
+
+     Level Employee                       Department
+---------- ------------------------------ -------------------------
+         1 100 Amelia Jones               110: Executives
+         2    101 Scott Harris            112: Technology
+         3       108 Adam Roditi          112: Technology
+         4          109 Ray Nelson        112: Technology
+         4          110 Chris Corman      112: Technology
+         4          111 William Belli     112: Technology
+         4          112 Lisa Swift        112: Technology
+         4          113 Kelly Milton      112: Technology
+         3       205 Mary Whitestar       112: Technology
+         4          206 Steve Newton      112: Technology
+         2    102 Bill Getz               113: Healthcare
+         3       103 Ana Ramos            113: Healthcare
+         4          104 Stan Evans        113: Healthcare
+         4          105 Mary Krall        113: Healthcare
+         4          106 Pat Boon          113: Healthcare
+         4          107 Jim Hall          113: Healthcare
+         2    114 Henry Carter            114: Consumer Products
+         3       115 Jill Bertram         114: Consumer Products
+         4          116 Bob Gates         114: Consumer Products
+         4          117 Howard Wheeler    114: Consumer Products
+         2    118 Jennie Kim              111: Administration
+         3       119 Tony Robert          111: Administration
+         4          120 Yun Xie           111: Administration
+         4          121 Rose Park         111: Administration
+         4          127 Tommy Lee         111: Administration
+         2    122 Jisoo Kim               115: Financial Advisory
+         3       123 Jesse Einsenberg     115: Financial Advisory
+         4          124 Andrew Garfield   115: Financial Advisory
+         4          125 Emma Stone        115: Financial Advisory
+         4          126 Krystal Lee       115: Financial Advisory
+
+
+Question 3:
+
+SQL> BREAK ON "Project Name" on  "Project Start Date"  skip 1
+SQL> COLUMN "Project Name"  FORMAT A45
+SQL> COLUMN "Project Start Date" FORMAT A19
+SQL> COLUMN "Assigned Month" FORMAT A15
+SQL> COLUMN "Hours Spent" 9999
+SP2-0158: unknown COLUMN option "9999"
+SQL>
+SQL>
+SQL> SELECT Name AS "Project Name" ,
+  2         Start_Date as "Project Start Date" ,
+  3         MONTH as "Assigned Month" ,
+  4     EMP# as "No.of Employees" ,
+  5     hours as "Hours Spent"
+  6  FROM (
+  7  SELECT Decode(Name , null , '------------' , Name) Name,
+  8         Decode(Start_Date,null , '--------' , Start_Date) Start_Date,
+  9         DECODE(to_char(Date_Assigned , 'MONTH'),null,'-Total-',to_char(Date_Assigned,'MONTH')) MONTH,
+ 10         COUNT(DISTINCT Emp_Num)EMP#,
+ 11         NVL(TO_CHAR(SUM(Hours_Used)),0) hours
+ 12  FROM(SELECT Proj_Number||': '||Name as Name, Start_Date, Date_Assigned, Assign_Num,Emp_Num, Hours_Used
+ 13  FROM Project JOIN Assignment USING (Proj_Number)
+ 14   JOIN employee USING (Emp_Num)
+ 15  WHERE Total_Cost IS NULL)
+ 16  GROUP BY GROUPING SETS(Name,(Name, Start_Date,to_char(Date_Assigned , 'MONTH')))
+ 17  ORDER BY Name, to_date(to_char(Date_Assigned , 'MONTH'), 'MONTH'));
+
+Project Name                                  Project Start Date  Assigned Month  No.of Employees Hours Spent
+--------------------------------------------- ------------------- --------------- --------------- ----------------------------------------
+10: PNC Banking Financial Implementation      01-NOV-19           OCTOBER                       2 155
+                                                                  NOVEMBER                      1 0
+
+                                              --------            -Total-                       2 155
+
+2: Acme Product Development                   10-AUG-19           AUGUST                        1 90
+                                                                  SEPTEMBER                     3 445
+                                                                  OCTOBER                       2 270
+                                                                  NOVEMBER                      1 0
+
+                                              --------            -Total-                       5 805
+
+7: Uber Profit maximization system            13-OCT-19           OCTOBER                       3 225
+                                                                  NOVEMBER                      2 0
+
+                                              --------            -Total-                       5 225
+
+
+11 rows selected.
+ 
+
+Question 4:
+
+SQL> ALTER TABLE employee
+  2  ADD ( BONUS_AMT  number(6,2) DEFAULT 0);
+
+Table altered.
+
+SQL> UPDATE employee E
+  2  SET E.BONUS_AMT = (SELECT Bonus_amt FROM(SELECT emp_num , No_projects , Hours_Used , (No_Projects * 200) as Bonus_Amt
+  3                                           FROM (SELECT emp_num , COUNT(DISTINCT proj_number) as No_Projects ,  SUM(hours_used) AS Hours_Used
+  4                                                 FROM Employee JOIN Assignment USING (emp_num)
+  5                                                               JOIN Project USING (proj_number)
+  6                                                 WHERE EXTRACT(YEAR FROM start_date)  = EXTRACT(YEAR FROM add_months(sysdate,-12))
+  7                                 GROUP BY emp_num
+  8                                 HAVING sum(hours_used) > 40)) E1
+  9         WHERE E.emp_num = E1.emp_num)
+ 10  WHERE emp_num =(SELECT emp_num FROM (SELECT emp_num , No_projects , Hours_Used , (No_Projects * 200) as Bonus_Amt
+ 11                                       FROM (SELECT emp_num , COUNT(DISTINCT proj_number) AS No_Projects ,  sum(hours_used) AS Hours_Used
+ 12                                             FROM Employee JOIN Assignment USING (emp_num)
+ 13                                                           JOIN Project USING (proj_number)
+ 14                                             WHERE EXTRACT(YEAR FROM start_date)  =  EXTRACT(YEAR FROM add_months(sysdate,-12))
+ 15                             GROUP BY emp_num
+ 16                             HAVING SUM(hours_used) > 40)) E2
+ 17         WHERE E.emp_num = E2.emp_num);
+
+7 rows updated.
+
+SQL> SELECT * FROM EMPLOYEE;
+ 
+EMP_NUM EMP_LAST                  EMP_FIRST                 DOB       HIRE_DATE   SUPER_ID  DEPT_CODE  BONUS_AMT
+---------- ------------------------- ------------------------- --------- --------- ---------- ---------- ----------
+       100 Jones                     Amelia                    17-MAY-74 18-MAY-11                   110          0
+       101 Harris                    Scott                     28-MAR-72 23-JAN-11        100        112          0
+       102 Getz                      Bill                      08-OCT-75 15-APR-12        100        113          0
+       103 Ramos                     Ana                       09-MAR-75 28-APR-13        102        113          0
+       104 Evans                     Stan                      14-JUL-76 15-MAR-16        103        113          0
+       105 Krall                     Mary                      11-FEB-88 01-JAN-18        103        113          0
+       106 Boon                      Pat                       23-NOV-84 08-OCT-16        103        113          0
+       107 Hall                      Jim                       06-AUG-80 12-SEP-19        103        113          0
+       108 Roditi                    Adam                      05-MAR-88 16-JUN-12        101        112          0
+       109 Nelson                    Ray                       24-SEP-91 23-APR-12        108        112        200
+       110 Corman                    Chris                     11-AUG-90 15-JUN-14        108        112        200
+       111 Belli                     William                   28-MAY-92 28-MAR-19        108        112          0
+       112 Swift                     Lisa                      17-FEB-97 13-OCT-19        108        112          0
+       113 Milton                    Kelly                     16-DEC-94 20-MAY-19        108        112          0
+       114 Carter                    Henry                     22-APR-91 10-JAN-13        100        114          0
+       115 Bertram                   Jill                      06-JUL-92 19-JUN-15        114        114        200
+       116 Gates                     Bob                       26-DEC-93 13-JAN-17        115        114        200
+       117 Wheeler                   Howard                    11-JUN-93 13-MAY-18        115        114          0
+       205 Whitestar                 Mary                      24-MAR-95 12-MAY-12        101        112          0
+       206 Newton                    Steve                     29-JAN-89 30-MAR-12        205        112          0
+       118 Kim                       Jennie                    12-JAN-87 05-FEB-12        100        111          0
+       119 Robert                    Tony                      25-OCT-90 11-DEC-15        118        111          0
+       120 Xie                       Yun                       01-OCT-94 16-AUG-16        119        111          0
+       121 Park                      Rose                      05-MAR-92 19-MAY-17        119        111          0
+       122 Kim                       Jisoo                     30-JUL-88 14-MAR-11        100        115        200
+       123 Einsenberg                Jesse                     30-JUN-76 15-MAY-12        122        115        200
+       124 Garfield                  Andrew                    12-MAY-95 13-NOV-17        123        115        200
+       125 Stone                     Emma                      03-AUG-85 26-JAN-17        123        115          0
+       126 Lee                       Krystal                   09-JUL-93 23-JUN-19        123        115          0
+       127 Lee                       Tommy                     03-JUL-85 03-NOV-18        119        111          0
+
+30 rows selected.
+ 
+Question 5:
+
+SQL> COLUMN "Employee" FORMAT A20
+SQL> COLUMN "Date of Training" FORMAT A17
+SQL> COLUMN "Hire Date" FORMAT A17
+SQL> COLUMN "Training Name" FORMAT A22
+SQL>
+SQL>
+SQL> SELECT emp_num||': '||emp_first||' '||emp_last AS "Employee",
+  2         hire_date AS "Hire Date",
+  3         DECODE(T.Train_Num , NULL , 'NA' , T.Train_Num||': '||T.Name ) AS "Training Name" ,
+  4         DECODE(date_acquired ,NULL, 'NA',date_acquired ) AS "Date of Training" ,
+  5         DECODE((date_acquired - Hire_date) , NULL , 'NA' , (date_acquired - Hire_date)) as "No Days b/w Training and Hire" ,
+  6         COUNT(DISTINCT proj_number) AS "No of projects"
+  7  FROM Employee E LEFT OUTER JOIN Training T USING (Emp_Num)
+  8              LEFT OUTER JOIN assignment A USING (emp_num)
+  9          LEFT OUTER JOIN project P USING (proj_number)
+ 10  WHERE EXTRACT(YEAR FROM hire_date ) = EXTRACT(YEAR FROM add_months(sysdate,-12))
+ 11  GROUP BY emp_num , emp_first , emp_last , hire_date , T.Train_Num , T.Train_Num||': '||T.Name , date_acquired
+ 12  ORDER BY 1;
+
+
+Employee             Hire Date         Training Name          Date of Training  No Days b/w Training and Hire            No of projects
+-------------------- ----------------- ---------------------- ----------------- ---------------------------------------- --------------
+105: Mary Krall      01-JAN-18         1000: ETL Training     01-JUN-18         151                                                   2
+117: Howard Wheeler  13-MAY-18         1022: Java Workshop    15-JAN-19         247                                                   0
+127: Tommy Lee       03-NOV-18         NA                     NA                NA                                                    0
+
+ 
+Question 6: 
+/* To calculate discontinuity , the logic used is if no employee was assigned to the project for a certain period of time and then employees are reassigned to the project. Such projects are considered discontinuous projects*/
+
+Project 10:Nobody was assigned to project from 21-Oct-2019 to 31-Oct-2019
+Project 1: Nobody was assigned to project from 01-Aug-2018 to 31-Aug-2018
+Project 7: Nobody was assigned to project from 01-Nov-2019 to 19-Nov-2019
+
+SQL> COLUMN "Project Name" FORMAT A45
+SQL> COLUMN "Start Date"  FORMAT A14
+SQL>
+SQL> SELECT DISTINCT Proj_Number||': '||Name as "Project Name" , Start_Date as "Start Date" ,
+  2  (CASE
+  3  WHEN total_cost is NULL THEN 'on-going'
+  4  ELSE 'completed'
+  5  END) AS "Status"
+  6  FROM (SELECT Proj_Number, Name , Start_Date, Emp_Num, total_cost, Date_Assigned, date_ended,
+  7               RANK() OVER (PARTITION BY Proj_Number, Emp_Num ORDER BY Date_Assigned) RANK,
+  8               Date_Assigned-LAG(date_ended) OVER (PARTITION BY Proj_Number ORDER BY Date_Assigned) isNot
+  9    FROM Project JOIN Assignment USING(Proj_Number))
+ 10  WHERE isNot >1
+ 11  ORDER BY 1;
+
+
+
+Project Name                                  Start Date     Status
+--------------------------------------------- -------------- ---------
+10: PNC Banking Financial Implementation      01-NOV-19      on-going
+1: Acme Services Implementation               12-JUL-18      completed
+7: Uber Profit maximization system            13-OCT-19      on-going
+
+ 
+Question 7:
+
+/*Note: While calculating projects in a Quarter, for projects split between 2 Quarters, project is counted only in the Quarter it started. However, number of employees and average hours per project are calculated for all the Quarters in which the project had employees assigned.
+
+Project 3: Started on 15-Jan-2019 and ended on 15-May-2019. Hence, the project is counted only in Quarter 1 but the employees assigned and average hours is calculated in both Quarter-1 and Quarter-2*/
+
+SQL> COLUMN "Quarter" FORMAT 99
+SQL>
+SQL>  SELECT C.Quartervalue AS "Quarter",
+  2          NVL(N_Project, 0) AS "Project Count",
+  3  NVL(Employee_Count, 0) AS "Employee Count",
+  4  NVL(Avg_hours, 0) AS "Average Hours per Project"
+  5   FROM
+  6      (SELECT TO_CHAR(date_assigned, 'Q') Quarter, COUNT(DISTINCT emp_num) Employee_Count,
+  7           (SUM(hours_used)/COUNT(DISTINCT proj_number)) Avg_hours
+  8       FROM Assignment
+  9       WHERE EXTRACT(YEAR FROM date_assigned) = EXTRACT(YEAR FROM SYSDATE)
+ 10       GROUP BY TO_CHAR(date_assigned, 'Q')) A
+ 11  LEFT OUTER JOIN
+ 12  (SELECT TO_CHAR(start_date, 'Q') Quarter,
+ 13          COUNT(DISTINCT proj_number) N_Project
+ 14       FROM project
+ 15       WHERE EXTRACT(YEAR FROM start_date) = EXTRACT(YEAR FROM sysdate)
+ 16       GROUP BY TO_CHAR(start_date, 'Q'))B
+ 17   ON B.Quarter = A.Quarter
+ 18   RIGHT OUTER JOIN
+ 19     (SELECT level AS Quartervalue
+ 20      FROM DUAL
+ 21      CONNECT BY level < = 4) C
+ 22   ON C.Quartervalue = A.Quarter
+ 23   ORDER BY A.Quarter;
+
+
+Quarter Project Count Employee Count Average Hours per Project
+------- ------------- -------------- -------------------------
+      1             1              4                       565
+      2             0              2                       195
+      3             2              5                       450
+      4             2             10                    231.25
+
+
+
+
+ 
+Question 8:
+SQL> SET LINESIZE 20000
+SQL> SET PAGESIZE 20000
+SQL> COLUMN "Employee Name" FORMAT A20
+SQL> COLUMN "ETL" FORMAT A3
+SQL> COLUMN "Spark" FORMAT A5
+SQL> COLUMN "Java" FORMAT A4
+SQL> COLUMN "Python" FORMAT A6
+SQL> COLUMN "Tableau" FORMAT A7
+SQL> COLUMN "C++" FORMAT A3
+SQL> COLUMN "Data Mining" FORMAT A11
+SQL>
+SQL> COLUMN "LD1" HEADING Latest|Date|Acquired FORMAT A12;
+SQL> COLUMN "LD2" HEADING Latest|Date|Acquired FORMAT A12;
+SQL> COLUMN "LD3" HEADING Latest|Date|Acquired FORMAT A12;
+SQL> COLUMN "LD4" HEADING Latest|Date|Acquired FORMAT A12;
+SQL> COLUMN "LD5" HEADING Latest|Date|Acquired FORMAT A12;
+SQL> COLUMN "LD6" HEADING Latest|Date|Acquired FORMAT A12;
+SQL> COLUMN "LD7" HEADING Latest|Date|Acquired FORMAT A12;
+SQL>
+SQL> SELECT ID,
+  2  DECODE("Employee Name", null,  'Number of Trainings:', "Employee Name") "Employee Name",
+  3  TO_CHAR(SUM("ETL")) as "ETL",
+  4  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+  5                  WHERE code = 10 AND ID = EMP_NUM GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD1",
+  6  TO_CHAR(SUM("Spark")) as "Spark",
+  7  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+  8               WHERE code = 20 AND ID = EMP_NUM GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD2",
+  9  TO_CHAR(SUM("Java")) as "Java",
+ 10  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+ 11               WHERE code = 30 AND ID = EMP_NUM GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD3",
+ 12  TO_CHAR(SUM("Python")) as "Python",
+ 13  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+ 14               WHERE code = 40 AND ID = EMP_NUM GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD4",
+ 15  TO_CHAR(SUM("Tableau")) as "Tableau",
+ 16  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+ 17               WHERE code = 50 AND ID = EMP_NUM GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD5",
+ 18  TO_CHAR(SUM("C++")) as "C++",
+ 19  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+ 20              WHERE code = 60 AND ID = EMP_NUM  GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD6",
+ 21  TO_CHAR(SUM("Data Mining")) as "Data Mining",
+ 22  NVL(TO_CHAR((SELECT MAX(Date_Acquired) FROM skill RIGHT OUTER JOIN training USING(code) RIGHT OUTER JOIN employee USING(EMP_NUM)
+ 23              WHERE code = 70 AND ID = EMP_NUM  GROUP BY Emp_Num, Emp_First||' '||Emp_Last, code)),'-------') AS "LD7",
+ 24  DECODE("Employee Name", NULL,NULL,sum("Number of Skills"))  "Number of Skills"
+ 25  FROM
+ 26  (SELECT Emp_Num ID,
+ 27  Emp_First||' '||Emp_Last "Employee Name",
+ 28  SUM(decode(code,10, 1, 0))"ETL",
+ 29  SUM(decode(code,20, 1, 0)) "Spark",
+ 30  SUM(decode(code,30, 1, 0)) "Java",
+ 31  SUM(decode(code,40, 1, 0)) "Python",
+ 32  SUM(decode(code,50, 1, 0)) "Tableau",
+ 33  SUM(decode(code,60, 1, 0)) "C++",
+ 34  SUM(decode(code,70, 1, 0)) "Data Mining",
+ 35  COUNT(DISTINCT code) "Number of Skills"
+ 36  FROM skill RIGHT OUTER JOIN training USING(code)
+ 37     RIGHT OUTER JOIN employee USING(EMP_NUM)
+ 38  GROUP BY GROUPING SETS((Emp_Num, Emp_First||' '||Emp_Last, code) , ())
+ 39  ORDER BY EMP_NUM)
+ 40  GROUP BY ID,"Employee Name"
+ 41  ORDER BY ID;
+
+ 
+
+                                    Latest             Latest            Latest              Latest               Latest           Latest                   Latest
+                                    Date               Date              Date                Date                 Date             Date                     Date
+        ID Employee Name        ETL Acquired     Spark Acquired     Java Acquired     Python Acquired     Tableau Acquired     C++ Acquired     Data Mining Acquired     Number of Skills
+---------- -------------------- --- ------------ ----- ------------ ---- ------------ ------ ------------ ------- ------------ --- ------------ ----------- ------------ ------------------
+       100 Amelia Jones         0   -------      0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      0
+       101 Scott Harris         0   -------      0     -------      0    -------      1      07-FEB-16    0       -------      0   -------      0           -------      1
+       102 Bill Getz            0   -------      0     -------      0    -------      0      -------      1       06-JUN-14    0   -------      0           -------      1
+       103 Ana Ramos            0   -------      0     -------      0    -------      0      -------      0       -------      1   01-AUG-15    0           -------      1
+       104 Stan Evans           0   -------      0     -------      0    -------      2      03-APR-18    0       -------      0   -------      0           -------      1
+       105 Mary Krall           1   01-JUN-18    0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      1
+       106 Pat Boon             0   -------      0     -------      0    -------      0      -------      1       01-MAY-17    0   -------      0           -------      1
+       107 Jim Hall             1   01-NOV-19    0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      1
+       108 Adam Roditi          0   -------      2     01-JUN-16    0    -------      0      -------      0       -------      0   -------      0           -------      1
+       109 Ray Nelson           0   -------      1     04-MAR-17    2    02-DEC-16    0      -------      0       -------      0   -------      0           -------      2
+       110 Chris Corman         0   -------      0     -------      2    01-APR-18    0      -------      0       -------      0   -------      0           -------      1
+       111 William Belli        0   -------      0     -------      0    -------      1      05-NOV-19    0       -------      0   -------      0           -------      1
+       112 Lisa Swift           0   -------      0     -------      0    -------      0      -------      1       01-NOV-19    0   -------      0           -------      1
+       113 Kelly Milton         0   -------      0     -------      0    -------      1      05-NOV-19    0       -------      0   -------      0           -------      1
+       114 Henry Carter         0   -------      0     -------      0    -------      0      -------      0       -------      1   06-AUG-15    0           -------      1
+       115 Jill Bertram         0   -------      0     -------      2    04-MAR-17    2      05-MAY-18    0       -------      0   -------      0           -------      2
+       116 Bob Gates            0   -------      0     -------      0    -------      0      -------      1       12-DEC-18    0   -------      0           -------      1
+       117 Howard Wheeler       0   -------      0     -------      1    15-JAN-19    0      -------      0       -------      0   -------      0           -------      1
+       118 Jennie Kim           0   -------      0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      0
+       119 Tony Robert          0   -------      0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      0
+       120 Yun Xie              0   -------      0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      0
+       121 Rose Park            0   -------      0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      0
+       122 Jisoo Kim            1   01-DEC-14    1     03-MAR-15    0    -------      0      -------      0       -------      2   06-MAY-14    0           -------      3
+       123 Jesse Einsenberg     1   06-JUL-13    0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      1
+       124 Andrew Garfield      0   -------      0     -------      1    03-MAR-19    0      -------      0       -------      0   -------      0           -------      1
+       125 Emma Stone           0   -------      0     -------      1    05-DEC-18    0      -------      0       -------      0   -------      0           -------      1
+       126 Krystal Lee          0   -------      1     01-JUN-19    0    -------      0      -------      0       -------      0   -------      0           -------      1
+       127 Tommy Lee            0   -------      0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      0
+       205 Mary Whitestar       1   05-MAY-14    0     -------      0    -------      0      -------      0       -------      0   -------      0           -------      1
+       206 Steve Newton         0   -------      0     -------      0    -------      0      -------      0       -------      1   08-MAR-16    0           -------      1
+           Number of Trainings: 5   -------      5     -------      9    -------      7      -------      4       -------      5   -------      0           -------
+
+31 rows selected.
+
+ 
+Question 9: 
+
+/*Note: For departments where no employee undertook any training , the no. of trainings for all skills is 0 and hence all have the same Rank 1*/
+
+SQL> COLUMN "Department" FORMAT A25
+SQL> COLUMN "Skill" FORMAT A17
+SQL> BREAK ON "Department"
+SQL>
+SQL> SELECT B.Department AS "Department" , B.Skill AS "Skill" , NVL(No_Trainings,0) AS "No of trainings" ,
+  2         DENSE_RANK() OVER (PARTITION BY B.Department ORDER BY NO_Trainings DESC NULLS LAST) AS "Rank"
+  3  FROM (SELECT dept_code||': '||D.Name AS Department, code||': '||Description AS Skill,
+  4               COUNT(train_num) AS No_Trainings
+  5        FROM Department D JOIN Employee E USING (dept_code)
+  6                          JOIN Training T USING (emp_num)
+  7                          JOIN Skill S USING (code)
+  8        GROUP BY dept_code , D.Name , code , description) A
+  9  RIGHT OUTER JOIN
+ 10       (SELECT dept_code||': '||Name AS Department , Code||': '||Description AS Skill
+ 11        FROM Department , Skill
+ 12        GROUP BY dept_code , Name , Code , description
+ 13        ORDER BY dept_code , code) B
+ 14  ON A.Department = B.Department and A.Skill = B.Skill
+ 15  ORDER BY 1 , 4;
+ 
+Department                Skill             No of trainings       Rank
+------------------------- ----------------- --------------- ----------
+110: Executives           50: Tableau                     0          1
+                          10: ETL                         0          1
+                          40: Python                      0          1
+                          60: C++                         0          1
+                          30: Java                        0          1
+                          20: Spark                       0          1
+                          70: Data Mining                 0          1
+111: Administration       10: ETL                         0          1
+                          40: Python                      0          1
+                          50: Tableau                     0          1
+                          60: C++                         0          1
+                          70: Data Mining                 0          1
+                          30: Java                        0          1
+                          20: Spark                       0          1
+112: Technology           30: Java                        4          1
+                          40: Python                      3          2
+                          20: Spark                       3          2
+                          50: Tableau                     1          3
+                          10: ETL                         1          3
+                          60: C++                         1          3
+                          70: Data Mining                 0          4
+113: Healthcare           40: Python                      2          1
+                          50: Tableau                     2          1
+                          10: ETL                         2          1
+                          60: C++                         1          2
+                          70: Data Mining                 0          3
+                          20: Spark                       0          3
+                          30: Java                        0          3
+114: Consumer Products    30: Java                        3          1
+                          40: Python                      2          2
+                          60: C++                         1          3
+                          50: Tableau                     1          3
+                          20: Spark                       0          4
+                          10: ETL                         0          4
+                          70: Data Mining                 0          4
+115: Financial Advisory   20: Spark                       2          1
+                          30: Java                        2          1
+                          60: C++                         2          1
+                          10: ETL                         2          1
+                          40: Python                      0          2
+                          50: Tableau                     0          2
+                          70: Data Mining                 0          2
+
+42 rows selected.
+ 
+Question 10:
+
+/*Note: Only considered full months since training date*/
+
+SQL> BREAK ON "Employee" on "Supervisor" on "#Training"
+SQL>
+SQL> COLUMN "Employee" FORMAT A25
+SQL> COLUMN "Supervisor" FORMAT A25
+SQL> COLUMN "#Training" FORMAT A9
+SQL> COLUMN "Training Name" FORMAT A25
+SQL> COLUMN "No.of Months" FORMAT 9999
+SQL> COLUMN "Skill" FORMAT A15
+SQL> COLUMN "Date Acquired" FORMAT A14
+SQL>
+SQL> SELECT e1.EMP_NUM||': '||e1.Emp_First||' '||e1.Emp_Last AS "Employee",
+  2         DECODE(e1.super_id , null , '-----------' , e1.Super_ID||': '||e2.Emp_First||' '||e2.Emp_Last) AS "Supervisor",
+  3         TO_CHAR(COUNT(DISTINCT training.train_num) OVER (PARTITION BY e1.EMP_NUM||' '||e1.Emp_First||' '||e1.Emp_Last)) AS "#Training",
+  4         DECODE(Train_Num, null , '------------' , Train_Num||': '||Name) AS "Training Name",
+  5         DECODE(Date_Acquired , null , '-------------',Date_Acquired ) AS "Date Acquired",
+  6         DECODE(code,null , '-----------' , code||': '||description) AS "Skill",
+  7         NVL(TRUNC(MONTHS_BETWEEN(sysdate, Date_Acquired),0),0) AS "No.of Months"
+  8  FROM Employee e1 LEFT OUTER JOIN Employee e2 ON(e1.Super_ID = e2.Emp_Num)
+  9       LEFT OUTER JOIN Training ON(e1.EMP_NUM = training.EMP_NUM)
+ 10       LEFT OUTER JOIN Skill USING(code)
+ 11  ORDER BY e1.EMP_NUM||' '||e1.Emp_First||' '||e1.Emp_Last;
+ 
+
+Employee                  Supervisor                #Training Training Name             Date Acquired  Skill           No.of Months
+------------------------- ------------------------- --------- ------------------------- -------------- --------------- ------------
+100: Amelia Jones         -----------               0         ------------              -------------  -----------                0
+101: Scott Harris         100: Amelia Jones         1         1010: Python Training     07-FEB-16      40: Python                45
+102: Bill Getz            100: Amelia Jones         1         1011: Tableau Course      06-JUN-14      50: Tableau               65
+103: Ana Ramos            102: Bill Getz            1         1012: C++ Workshop        01-AUG-15      60: C++                   52
+104: Stan Evans           103: Ana Ramos            2         1013: Python Training     03-APR-17      40: Python                32
+                                                              1029: Python Training     03-APR-18      40: Python                20
+105: Mary Krall           103: Ana Ramos            1         1000: ETL Training        01-JUN-18      10: ETL                   18
+106: Pat Boon             103: Ana Ramos            1         1014: Tableau Workshop    01-MAY-17      50: Tableau               31
+107: Jim Hall             103: Ana Ramos            1         1015: ETL Training        01-NOV-19      10: ETL                    1
+108: Adam Roditi          101: Scott Harris         2         1016: Spark Training      01-JUN-15      20: Spark                 54
+                                                              1030: Spark Training      01-JUN-16      20: Spark                 42
+109: Ray Nelson           108: Adam Roditi          3         1001: C++ Training        02-DEC-16      30: Java                  36
+                                                              1002: C++ Course          04-MAR-16      30: Java                  45
+                                                              1008: Spark Course        04-MAR-17      20: Spark                 33
+110: Chris Corman         108: Adam Roditi          2         1017: Java Course         01-APR-17      30: Java                  32
+                                                              1031: Java Course         01-APR-18      30: Java                  20
+111: William Belli        108: Adam Roditi          1         1018: Python Workshop     05-NOV-19      40: Python                 0
+112: Lisa Swift           108: Adam Roditi          1         1006: Tableau Course      01-NOV-19      50: Tableau                1
+113: Kelly Milton         108: Adam Roditi          1         1019: Python Workshop     05-NOV-19      40: Python                 0
+114: Henry Carter         100: Amelia Jones         1         1020: C++ Course          06-AUG-15      60: C++                   51
+115: Jill Bertram         114: Henry Carter         4         1003: Python Workshop     05-MAY-18      40: Python                18
+                                                              1005: Python Training     01-DEC-15      40: Python                48
+                                                              1009: C++ Course          04-MAR-16      30: Java                  45
+                                                              1028: C++ Course          04-MAR-17      30: Java                  33
+116: Bob Gates            115: Jill Bertram         1         1021: Tableau Course      12-DEC-18      50: Tableau               11
+117: Howard Wheeler       115: Jill Bertram         1         1022: Java Workshop       15-JAN-19      30: Java                  10
+118: Jennie Kim           100: Amelia Jones         0         ------------              -------------  -----------                0
+119: Tony Robert          118: Jennie Kim           0         ------------              -------------  -----------                0
+120: Yun Xie              119: Tony Robert          0         ------------              -------------  -----------                0
+121: Rose Park            119: Tony Robert          0         ------------              -------------  -----------                0
+122: Jisoo Kim            100: Amelia Jones         4         1023: C++ Course          06-MAY-13      60: C++                   78
+                                                              1032: C++ Course          06-MAY-14      60: C++                   66
+                                                              1033: ETL Training        01-DEC-14      10: ETL                   60
+                                                              1034: Spark Course        03-MAR-15      20: Spark                 57
+123: Jesse Einsenberg     122: Jisoo Kim            1         1024: ETL Workshop        06-JUL-13      10: ETL                   76
+124: Andrew Garfield      123: Jesse Einsenberg     1         1025: Java Training       03-MAR-19      30: Java                   9
+125: Emma Stone           123: Jesse Einsenberg     1         1026: Java Training       05-DEC-18      30: Java                  11
+126: Krystal Lee          123: Jesse Einsenberg     1         1027: Spark Course        01-JUN-19      20: Spark                  6
+127: Tommy Lee            119: Tony Robert          0         ------------              -------------  -----------                0
+205: Mary Whitestar       101: Scott Harris         1         1007: ETL Workshop        05-MAY-14      10: ETL                   66
+206: Steve Newton         205: Mary Whitestar       1         1004: C++ Training        08-MAR-16      60: C++                   44
+
+41 rows selected. 
+Question 11:
+
+/*Note: Calculated Utilization rate and rounded upto 4 decimals*/   
+
+SQL> COLUMN "Employee" format A25
+SQL> COLUMN "Utilization Rate" format A25
+SQL> COLUMN "Award/ Bonus" format A15
+SQL> COLUMN "Rank" format A15
+SQL>
+SQL> SELECT rank AS " Rank" , "Employee" , "Utilization Rate" ,
+  2  (CASE
+  3      WHEN rank = 1 THEN '$10,000'
+  4  WHEN rank = 2 THEN '$9,000'
+  5  WHEN rank = 3 THEN '$8,000'
+  6  WHEN rank = 4 THEN '$7,000'
+  7  WHEN rank = 5 THEN '$6,000'
+  8  ELSE '$0'
+  9  END) "Award/ Bonus"
+ 10  FROM ( SELECT "Employee" , Utilization_Rate as "Utilization Rate"  ,
+ 11                 DENSE_RANK() OVER (ORDER BY  Utilization_Rate DESC) rank
+ 12        FROM( SELECT Employee AS "Employee",
+ 13                 NVL(TO_CHAR(ROUND((Hours_worked/Hours_available),4), '9999.9999'),'NA') as Utilization_Rate
+ 14              FROM(SELECT emp_num||': '||emp_first||' '||emp_last as Employee,
+ 15              (((sysdate - hire_date)/7)*40) as Hours_available ,
+ 16   SUM(hours_used) as Hours_worked
+ 17                   FROM employee JOIN assignment USING (emp_num)
+ 18                                 JOIN project USING (proj_number)
+ 19  GROUP BY emp_num, emp_first , emp_last, hire_date))
+ 20  ORDER BY 1)
+ 21  WHERE rank <=5
+ 22  ORDER BY rank;
+
+
+      Rank Employee                  Utilization Rate          Award/ Bonus
+---------- ------------------------- ------------------------- ---------------
+         1 115: Jill Bertram              .0702                $10,000
+         2 116: Bob Gates                 .0611                $9,000
+         3 124: Andrew Garfield           .0594                $8,000
+         4 125: Emma Stone                .0588                $7,000
+         5 105: Mary Krall                .0549                $6,000
+
+ 
+Question 12: 
+
+SQL> BREAK ON "Table Name"
+SQL>
+SQL> COLUMN "Table Name" FORMAT A20
+SQL> COLUMN "Column Name" FORMAT A20
+SQL> COLUMN "Constraint Name" FORMAT A30
+SQL> COLUMN "Constraint Type" FORMAT A16
+SQL> COLUMN "Search Condition" FORMAT A65
+SQL> COLUMN "Reference Table" FORMAT A16
+SQL> COLUMN  "Reference Column" FORMAT A30
+SQL>
+SQL> SELECT
+  2      a.table_name "Table Name",
+  3      a.COLUMN_NAME "Column Name",
+  4      DECODE(a.constraint_name, null , '---------------------', a.constraint_name)  "Constraint Name",
+  5      DECODE(a.type , null , '---' , a.type) "Constraint Type",
+  6      DECODE(a.SEARCH_CONDITION_VC , null , '--------------------------------------' , a.SEARCH_CONDITION_VC)  "Search Condition",
+  7      DECODE(b.table_name , null , '-----------' , b.table_name) "Reference Table",
+  8      DECODE(b.column_name , null, '-----------',b.column_name) "Reference Column"
+  9  FROM(
+ 10     (SELECT * FROM
+ 11             ((SELECT table_name, COLUMN_NAME from USER_TAB_COLUMNS) tb1
+ 12               LEFT OUTER jOIN
+ 13              (SELECT table_name,COLUMN_NAME, CONSTRAINT_NAME,
+ 14                      DECODE(constraint_type,'C', 'CK', 'R','FK', 'P', 'PK', 'U', 'UK') type,
+ 15                    SEARCH_CONDITION_VC,
+ 16                    r_constraint_name
+ 17               FROM USER_CONSTRAINTS uc JOIN USER_CONS_COLUMNS ucc USING (constraint_name,table_name))tb2
+ 18     USING(table_name,column_name))
+ 19     ORDER BY table_name) a
+ 20     LEFT OUTER JOIN
+ 21     (SELECT * FROM
+ 22              ((SELECT table_name, COLUMN_NAME from USER_TAB_COLUMNS) tb1
+ 23              LEFT OUTER jOIN
+ 24              (SELECT table_name,COLUMN_NAME, CONSTRAINT_NAME,
+ 25                      DECODE(constraint_type,'C', 'CK', 'R','FK', 'P', 'PK', 'U', 'UK') type,
+ 26                    SEARCH_CONDITION_VC,
+ 27                    r_constraint_name
+ 28              FROM USER_CONSTRAINTS uc JOIN USER_CONS_COLUMNS ucc USING (constraint_name,table_name))tb2
+ 29     USING(table_name,column_name))
+ 30     ORDER BY table_name) b
+ 31     ON(a.r_constraint_name = b.constraint_name));
+
+
+
+
+
+
+
+
+
+
+Table Name           Column Name          Constraint Name                Constraint Type  Search Condition                                                  Reference Table  Reference Column
+-------------------- -------------------- ------------------------------ ---------------- ----------------------------------------------------------------- ---------------- ----------------------------
+ASSIGNMENT           DATE_ENDED           ASSIGNMENT_DATE_ENDED_CK       CK               Date_Ended > Date_Assigned                                        -----------      -----------
+                     DATE_ASSIGNED        ASSIGNMENT_DATE_ENDED_CK       CK               Date_Ended > Date_Assigned                                        -----------      -----------
+                     HOURS_USED           ---------------------          ---              --------------------------------------                            -----------      -----------
+                     EMP_NUM              ASSIGNMENT_EMP_NUM_FK          FK               --------------------------------------                            EMPLOYEE         EMP_NUM
+                     PROJ_NUMBER          ASSIGNMENT_PROJ_NUM_FK         FK               --------------------------------------                            PROJECT          PROJ_NUMBER
+                     ASSIGN_NUM           ASSIGNMENT_ASSIGN_NUM_PK       PK               --------------------------------------                            -----------      -----------
+CLIENT               NAME                 ---------------------          ---              --------------------------------------                            -----------      -----------
+                     WEB_ADDRESS          ---------------------          ---              --------------------------------------                            -----------      -----------
+                     CITY                 ---------------------          ---              --------------------------------------                            -----------      -----------
+                     STATE                ---------------------          ---              --------------------------------------                            -----------      -----------
+                     ZIP_CODE             CLIENT_ZIPCODE_CK              CK               REGEXP_LIKE(Zip_Code , '^([0-9]{5})$')                            -----------      -----------
+                     INDUSTRY             ---------------------          ---              --------------------------------------                            -----------      -----------
+                     STREET               ---------------------          ---              --------------------------------------                            -----------      -----------
+                     PHONE                CLIENT_PHONE_CK                CK               REGEXP_LIKE(phone,'^([0-9]{3}-[0-9]{3}-[0-9]{4}|[0-9]{10})$')     -----------      -----------
+                     CONTACT_NAME         ---------------------          ---              --------------------------------------                            -----------      -----------
+                     CLIENT_ID            CLIENT_CLIENT_ID_PK            PK               --------------------------------------                            -----------      -----------
+DEPARTMENT           MANAGER_ID           DEPARTMENT_MANAGER_ID_FK       FK               --------------------------------------                            EMPLOYEE         EMP_NUM
+                     PHONE                DEPARTMENT_PHONE_CK            CK               REGEXP_LIKE (phone,'^([0-9]{3}-[0-9]{3}-[0-9]{4}|[0-9]{10})$')    -----------      -----------
+                     LOCATION             ---------------------          ---              --------------------------------------                            -----------      -----------
+                     DEPT_CODE            DEPARTMENT_DEPT_CODE_PK        PK               --------------------------------------                            -----------      -----------
+                     NAME                 ---------------------          ---              --------------------------------------                            -----------      -----------
+EMPLOYEE             DEPT_CODE            EMPLOYEE_DEPTCODE_FK           FK               --------------------------------------                            DEPARTMENT       DEPT_CODE
+                     EMP_NUM              EMPLOYEE_EMP_NUM_PK            PK               --------------------------------------                            -----------      -----------
+                     HIRE_DATE            EMPLOYEE_HIRE_DATE_CK          CK               Hire_Date > DOB                                                   -----------      -----------
+                     SUPER_ID             EMPLOYEE_SUPER_ID_FK           FK               --------------------------------------                            EMPLOYEE         EMP_NUM
+                     EMP_LAST             ---------------------          ---              --------------------------------------                            -----------      -----------
+                     EMP_FIRST            ---------------------          ---              --------------------------------------                            -----------      -----------
+                     DOB                  EMPLOYEE_HIRE_DATE_CK          CK               Hire_Date > DOB                                                   -----------      -----------
+PROJECT              DEPT_CODE            PROJECT_DEPT_CODE_FK           FK               --------------------------------------                            DEPARTMENT       DEPT_CODE
+                     CLIENT_ID            PROJECT_CLIENT_ID_FK           FK               --------------------------------------                            CLIENT           CLIENT_ID
+                     TOTAL_COST           ---------------------          ---              --------------------------------------                            -----------      -----------
+                     START_DATE           ---------------------          ---              --------------------------------------                            -----------      -----------
+                     NAME                 ---------------------          ---              --------------------------------------                            -----------      -----------
+                     PROJ_NUMBER          PROJECT_PROJ_NUMBER__PK        PK               --------------------------------------                            -----------      -----------
+SKILL                CODE                 SKILLS_CODE_PK                 PK               --------------------------------------                            -----------      -----------
+                     DESCRIPTION          ---------------------          ---              --------------------------------------                            -----------      -----------
+TRAINING             TRAIN_NUM            TRAINING_TRAIN_NUM_PK          PK               --------------------------------------                            -----------      -----------
+                     CODE                 TRAINING_CODE_FK               FK               --------------------------------------                            SKILL            CODE
+                     EMP_NUM              TRAINING_EMP_NUM_FK            FK               --------------------------------------                            EMPLOYEE         EMP_NUM
+                     DATE_ACQUIRED        ---------------------          ---              --------------------------------------                            -----------      -----------
+                     NAME                 ---------------------          ---              --------------------------------------                            -----------      -----------
+                     COMMENTS             ---------------------          ---              --------------------------------------                            -----------      -----------
+
+42 rows selected.
